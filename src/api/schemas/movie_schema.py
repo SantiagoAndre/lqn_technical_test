@@ -5,38 +5,44 @@ from graphene_django.forms.types import ErrorType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import superuser_required
 
-from .models import Character as CharacterModel
+from ..models import Movie as MovieModel
 
 
-class Character(DjangoObjectType):
+class Movie(DjangoObjectType):
   class Meta:
-    model = CharacterModel
+    model = MovieModel
+    fields = "__all__"
     filter_fields = {
-      'name': ['exact', 'icontains', 'istartswith']
+      'name': ['exact', 'icontains', 'istartswith'],
+      'year': ['gt', 'gte', 'lt', 'lte'],
+      'director': ['exact', 'icontains', 'istartswith'],
+      'opening_crawl': ['exact', 'icontains', 'istartswith'],
+      'planets__name': ['exact', 'icontains', 'istartswith'],
+      'productors__name': ['exact', 'icontains', 'istartswith']
     }
     interfaces = (relay.Node, )
 
 class Query(ObjectType):
-  characters = DjangoFilterConnectionField(Character)
-  character = graphene.Field(Character,
+  movies = DjangoFilterConnectionField(Movie)
+  movie = graphene.Field(Movie,
                                 id=graphene.Int())
   @superuser_required
-  def resolve_character(self, info, *args, **kwargs):
+  def resolve_movie(self, info, *args, **kwargs):
     id = kwargs.get('id')
     if id is not None:
-      return CharacterModel.objects.get(pk=id)
+      return MovieModel.objects.get(pk=id)
     return None
   @superuser_required
-  def resolve_characters(self, info, *args, **kwargs):
-    return CharacterModel.objects.filter(**kwargs)
+  def resolve_movies(self, info, *args, **kwargs):
+    return MovieModel.objects.filter(**kwargs)
 
 
 from graphene_django.forms.mutation import DjangoModelFormMutation, DjangoFormMutation
-from .forms import CreateCharacterForm
+from ..forms import CreateMovieForm
 
-class CharacterMutation(DjangoModelFormMutation):
+class MovieMutation(DjangoModelFormMutation):
   class Meta:
-    form_class = CreateCharacterForm
+    form_class = CreateMovieForm
   @classmethod
   @superuser_required
   def mutate_and_get_payload(cls, root, info, **input):
@@ -47,4 +53,4 @@ class CharacterMutation(DjangoModelFormMutation):
       errors = ErrorType.from_errors(form.errors)
       return cls(errors=errors)
 class Mutation(ObjectType):
-  character = CharacterMutation.Field()
+  movie = MovieMutation.Field()

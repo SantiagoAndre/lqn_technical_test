@@ -5,7 +5,7 @@ from graphene_django.forms.types import ErrorType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import superuser_required
 
-from .models import Planet as PlanetModel
+from ..models import Planet as PlanetModel
 
 
 class Planet(DjangoObjectType):
@@ -32,7 +32,7 @@ class Query(ObjectType):
 
 
 from graphene_django.forms.mutation import DjangoModelFormMutation, DjangoFormMutation
-from .forms import CreatePlanetForm
+from ..forms import CreatePlanetForm
 
 class PlanetMutation(DjangoModelFormMutation):
   class Meta:

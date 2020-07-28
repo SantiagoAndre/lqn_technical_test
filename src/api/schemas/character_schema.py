@@ -5,41 +5,38 @@ from graphene_django.forms.types import ErrorType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import superuser_required
 
-from .models import Productor as ProductorModel
+from ..models import Character as CharacterModel
 
 
-
-class Productor(DjangoObjectType):
+class Character(DjangoObjectType):
   class Meta:
-    model = ProductorModel
+    model = CharacterModel
     filter_fields = {
       'name': ['exact', 'icontains', 'istartswith']
     }
     interfaces = (relay.Node, )
 
 class Query(ObjectType):
-  productors = DjangoFilterConnectionField(Productor)
-  productor = graphene.Field(Productor,
+  characters = DjangoFilterConnectionField(Character)
+  character = graphene.Field(Character,
                                 id=graphene.Int())
-
   @superuser_required
-  def resolve_productor(self, info, *args, **kwargs):
+  def resolve_character(self, info, *args, **kwargs):
     id = kwargs.get('id')
     if id is not None:
-      return ProductorModel.objects.get(pk=id)
+      return CharacterModel.objects.get(pk=id)
     return None
   @superuser_required
-  def resolve_productors(self, info, *args, **kwargs):
-    return ProductorModel.objects.filter(**kwargs)
+  def resolve_characters(self, info, *args, **kwargs):
+    return CharacterModel.objects.filter(**kwargs)
 
 
 from graphene_django.forms.mutation import DjangoModelFormMutation, DjangoFormMutation
-from .forms import CreateProductorForm
+from ..forms import CreateCharacterForm
 
-class ProductorMutation(DjangoModelFormMutation):
+class CharacterMutation(DjangoModelFormMutation):
   class Meta:
-    form_class = CreateProductorForm
-
+    form_class = CreateCharacterForm
   @classmethod
   @superuser_required
   def mutate_and_get_payload(cls, root, info, **input):
@@ -49,6 +46,5 @@ class ProductorMutation(DjangoModelFormMutation):
     else:
       errors = ErrorType.from_errors(form.errors)
       return cls(errors=errors)
-
 class Mutation(ObjectType):
-  productor = ProductorMutation.Field()
+  character = CharacterMutation.Field()

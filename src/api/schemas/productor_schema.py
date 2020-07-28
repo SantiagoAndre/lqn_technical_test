@@ -5,44 +5,41 @@ from graphene_django.forms.types import ErrorType
 from graphene_django.filter import DjangoFilterConnectionField
 from graphql_jwt.decorators import superuser_required
 
-from .models import Movie as MovieModel
+from ..models import Productor as ProductorModel
 
 
-class Movie(DjangoObjectType):
+
+class Productor(DjangoObjectType):
   class Meta:
-    model = MovieModel
-    fields = "__all__"
+    model = ProductorModel
     filter_fields = {
-      'name': ['exact', 'icontains', 'istartswith'],
-      'year': ['gt', 'gte', 'lt', 'lte'],
-      'director': ['exact', 'icontains', 'istartswith'],
-      'opening_crawl': ['exact', 'icontains', 'istartswith'],
-      'planets__name': ['exact', 'icontains', 'istartswith'],
-      'productors__name': ['exact', 'icontains', 'istartswith']
+      'name': ['exact', 'icontains', 'istartswith']
     }
     interfaces = (relay.Node, )
 
 class Query(ObjectType):
-  movies = DjangoFilterConnectionField(Movie)
-  movie = graphene.Field(Movie,
+  productors = DjangoFilterConnectionField(Productor)
+  productor = graphene.Field(Productor,
                                 id=graphene.Int())
+
   @superuser_required
-  def resolve_movie(self, info, *args, **kwargs):
+  def resolve_productor(self, info, *args, **kwargs):
     id = kwargs.get('id')
     if id is not None:
-      return MovieModel.objects.get(pk=id)
+      return ProductorModel.objects.get(pk=id)
     return None
   @superuser_required
-  def resolve_movies(self, info, *args, **kwargs):
-    return MovieModel.objects.filter(**kwargs)
+  def resolve_productors(self, info, *args, **kwargs):
+    return ProductorModel.objects.filter(**kwargs)
 
 
 from graphene_django.forms.mutation import DjangoModelFormMutation, DjangoFormMutation
-from .forms import CreateMovieForm
+from ..forms import CreateProductorForm
 
-class MovieMutation(DjangoModelFormMutation):
+class ProductorMutation(DjangoModelFormMutation):
   class Meta:
-    form_class = CreateMovieForm
+    form_class = CreateProductorForm
+
   @classmethod
   @superuser_required
   def mutate_and_get_payload(cls, root, info, **input):
@@ -52,5 +49,6 @@ class MovieMutation(DjangoModelFormMutation):
     else:
       errors = ErrorType.from_errors(form.errors)
       return cls(errors=errors)
+
 class Mutation(ObjectType):
-  movie = MovieMutation.Field()
+  productor = ProductorMutation.Field()
