@@ -9,6 +9,7 @@ pillow = "*"
 graphene-django = "*"
 django-filter = "*"
 django-admin-object-actions = "*"
+django-graphql-jwt = "*"
 
 [dev-packages]
 pylint = "*"
